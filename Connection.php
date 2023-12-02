@@ -14,9 +14,10 @@ class Connection {
         $this->dbh = self::PDO($credentials, $this->db_name);
     }
 
-    static function PDO(Credentials $credentials, $db_name = null) {
-        if (isset($db_name)) {
-            $dsn = "mysql:host={$credentials->server_name};db_name={$credentials->db_name};port={$credentials->port}";
+    static function PDO(Credentials $credentials, $db_name = null)
+    {
+        if (isset($credentials->db_name)) {
+            $dsn = "mysql:host={$credentials->server_name};dbname={$credentials->db_name};port={$credentials->port}";
         } else {
             $dsn = "mysql:host={$credentials->server_name};port={$credentials->port}";
         }
@@ -31,8 +32,7 @@ class Connection {
         return $dbh;
     }
 
-
-//    public function getConnection() {
-//        return $this->pdo;
-//    }
+    public function getConnection() {
+        return $this->pdo;
+    }
 }
