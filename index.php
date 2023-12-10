@@ -2,16 +2,16 @@
 namespace Credentials;
 require_once 'autoloader.php';
 
-
 try {
     $db = new DataBase();
 
-    $table_name = 'test_table';
-    $data = [
-        'test_column' => 'test',
+    $table = 'test_table';
+    $filter = [
+        'id' => 1,
+        'select_column' => 'test_column',
     ];
 
-    $db->createRecord($table_name, $data);
+    $db->selectRecord($table, $filter);
 } catch (\Exception $e) {
     echo "Error: " . $e->getMessage();
 }

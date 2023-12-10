@@ -11,17 +11,17 @@ class DataBase
         $this->connection = new Connection();
     }
 
-    public function createRecord($table_name, $data)
+    public function addRecord($table, $record)
     {
         try {
             $pdo = $this->connection->getConnection();
 
-            $columns = implode(", ", array_keys($data));
-            $placeholders = ":" . implode(", :", array_keys($data));
+            $columns = implode(", ", array_keys($record));
+            $placeholders = ":" . implode(", :", array_keys($record));
 
-            $stmt = $pdo->prepare("INSERT INTO {$table_name} ({$columns}) VALUES ({$placeholders}) ");
+            $stmt = $pdo->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$placeholders}) ");
 
-            foreach ($data as $key => $value) {
+            foreach ($record as $key => $value) {
                 $stmt->bindValue(":{$key}", $value);
             }
 
@@ -32,4 +32,38 @@ class DataBase
             echo "Error: " . $e->getMessage();
         }
     }
+
+public function selectRecord($table, $filter)
+{
+    try {
+        $pdo = $this->connection->getConnection();
+
+        $selected_column = isset($filter['select_column']) ? $filter['select_column'] : '*';
+        unset($filter['select_column']);
+
+        $columns = implode(", ", array_keys($filter));
+
+        $query = "SELECT {$selected_column} FROM {$table} WHERE ";
+        $conditions = [];
+        foreach ($filter as $key => $val) {
+            $conditions[] = "{$key} = :{$key}";
+        }
+        $query .= implode(' AND ', $conditions);
+
+        $stmt = $pdo->prepare($query);
+
+        foreach ($filter as $key => &$val) {
+            $stmt->bindParam(":{$key}", $val);
+        }
+
+        $stmt->execute();
+
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            echo "{$row[$selected_column]}<br/>";
+        }
+    } catch (\Exception $e) {
+        echo "Error: " . $e->getMessage();
+    }
+}
+
 }
