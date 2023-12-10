@@ -9,7 +9,10 @@ class DataBase
     public function __construct()
     {
         $this->connection = new Connection();
+        // TODO: instancier PDO ici?
     }
+
+
 
     public function addRecord($table, $record)
     {
@@ -17,9 +20,10 @@ class DataBase
             $pdo = $this->connection->getConnection();
 
             $columns = implode(", ", array_keys($record));
-            $placeholders = ":" . implode(", :", array_keys($record));
+            $vals = ":" . implode(", :", array_keys($record));
+            $query = "INSERT INTO {$table} ({$columns}) VALUES ({$vals}) ";
 
-            $stmt = $pdo->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$placeholders}) ");
+            $stmt = $pdo->prepare($query);
 
             foreach ($record as $key => $value) {
                 $stmt->bindValue(":{$key}", $value);
@@ -83,7 +87,9 @@ public function selectRecord($table, $filter)
             }
             $filter_clause = implode(' AND ', $filter_array);
 
-            $stmt = $pdo->prepare("UPDATE {$table} SET {$set_clause} WHERE {$filter_clause}");
+            $query = "UPDATE {$table} SET {$set_clause} WHERE {$filter_clause}";
+
+            $stmt = $pdo->prepare($query);
 
             foreach ($record as $column => &$value) {
                 $stmt->bindParam(":{$column}", $value);
@@ -111,7 +117,9 @@ public function selectRecord($table, $filter)
             }
             $filter_clause = implode(' AND ', $filter_array);
 
-            $stmt = $pdo->prepare("DELETE FROM {$table} WHERE {$filter_clause}");
+            $query = "DELETE FROM {$table} WHERE {$filter_clause}";
+
+            $stmt = $pdo->prepare($query);
 
             foreach ($filter as $column => &$value) {
                 $stmt->bindParam(":{$column}", $value);
@@ -124,5 +132,6 @@ public function selectRecord($table, $filter)
             echo "Error: " . $e->getMessage();
         }
     }
-
 }
+
+// feur
