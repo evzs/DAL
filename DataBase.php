@@ -66,4 +66,63 @@ public function selectRecord($table, $filter)
     }
 }
 
+    public function updateRecord($table, $record, $filter)
+    {
+        try {
+            $pdo = $this->connection->getConnection();
+
+            $set_array = [];
+            foreach ($record as $column => $value) {
+                $set_array[] = "{$column} = :{$column}";
+            }
+            $set_clause   = implode(', ', $set_array);
+
+            $filter_array = [];
+            foreach ($filter as $column => $value) {
+                $filter_array[] = "{$column} = :where_{$column}";
+            }
+            $filter_clause = implode(' AND ', $filter_array);
+
+            $stmt = $pdo->prepare("UPDATE {$table} SET {$set_clause} WHERE {$filter_clause}");
+
+            foreach ($record as $column => &$value) {
+                $stmt->bindParam(":{$column}", $value);
+            }
+
+            foreach ($filter as $column => &$value) {
+                $stmt->bindParam(":where_{$column}", $value);
+            }
+            $stmt->execute();
+
+            echo "Record updated";
+        } catch (\Exception $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    }
+
+    public function deleteRecord($table, $filter)
+    {
+        try {
+            $pdo = $this->connection->getConnection();
+
+            $filter_array = [];
+            foreach ($filter as $column => $value) {
+                $filter_array[] = "{$column} = :{$column}";
+            }
+            $filter_clause = implode(' AND ', $filter_array);
+
+            $stmt = $pdo->prepare("DELETE FROM {$table} WHERE {$filter_clause}");
+
+            foreach ($filter as $column => &$value) {
+                $stmt->bindParam(":{$column}", $value);
+            }
+
+            $stmt->execute();
+
+            echo "Record deleted";
+        } catch (\Exception $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    }
+
 }
