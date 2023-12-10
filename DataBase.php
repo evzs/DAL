@@ -1,16 +1,14 @@
 <?php
 namespace Credentials;
-require_once 'autoloader.php';
 
 class DataBase
 {
     private $connection;
-    private $pdo;
 
     public function __construct()
     {
         $this->connection = new Connection();
-        $pdo = $this->connection->getConnection();
+        // TODO: instancier PDO ici?
     }
 
 
@@ -18,7 +16,8 @@ class DataBase
     public function addRecord($table, $record)
     {
         try {
-            $pdo = $this->pdo;
+            $pdo = $this->connection->getConnection();
+
             $columns = implode(", ", array_keys($record));
             $vals = ":" . implode(", :", array_keys($record));
             $query = "INSERT INTO {$table} ({$columns}) VALUES ({$vals}) ";
@@ -40,7 +39,8 @@ class DataBase
 public function selectRecord($table, $filter)
 {
     try {
-        $pdo = $this->pdo;
+        $pdo = $this->connection->getConnection();
+
         $selected_column = isset($filter['select_column']) ? $filter['select_column'] : '*';
         unset($filter['select_column']);
 
@@ -72,7 +72,8 @@ public function selectRecord($table, $filter)
     public function updateRecord($table, $record, $filter)
     {
         try {
-            $pdo = $this->pdo;
+            $pdo = $this->connection->getConnection();
+
             $set_array = [];
             foreach ($record as $column => $value) {
                 $set_array[] = "{$column} = :{$column}";
@@ -107,7 +108,8 @@ public function selectRecord($table, $filter)
     public function deleteRecord($table, $filter)
     {
         try {
-            $pdo = $this->pdo;
+            $pdo = $this->connection->getConnection();
+
             $filter_array = [];
             foreach ($filter as $column => $value) {
                 $filter_array[] = "{$column} = :{$column}";
