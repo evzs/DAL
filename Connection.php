@@ -16,7 +16,7 @@ class Connection {
 
     static function PDO(Credentials $credentials, $db_name = null)
     {
-        if (isset($credentials->db_name)) {
+        if (isset($credentials->db_name)) { 
             $dsn = "mysql:host={$credentials->server_name};dbname={$credentials->db_name};port={$credentials->port}";
         } else {
             $dsn = "mysql:host={$credentials->server_name};port={$credentials->port}";
