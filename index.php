@@ -8,7 +8,7 @@ try {
     $table = 'test_table';
     $filter = [
         'id' => 1,
-        'select_column' => 'test_column',
+        'select_column' => '*',
     ];
 
     $db->selectRecord($table, $filter);

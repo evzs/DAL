@@ -10,9 +10,9 @@ class DataBase
         $this->connection = new Connection();
         // TODO: instancier PDO ici?
     }
+    
 
-
-
+    // insere un nouveau registre dans la table
     public function addRecord($table, $record)
     {
         try {
@@ -36,38 +36,50 @@ class DataBase
         }
     }
 
-public function selectRecord($table, $filter)
-{
-    try {
-        $pdo = $this->connection->getConnection();
+    // selectionne un registre dans la table
+    public function selectRecord($table, $filter)
+    {
+        try {
+            $pdo = $this->connection->getConnection();
 
-        $selected_column = isset($filter['select_column']) ? $filter['select_column'] : '*';
-        unset($filter['select_column']);
+            if (isset($filter['select_column'])) {
+                $selected_column = $filter['select_column'];
+                unset($filter['select_column']);
+            } else {
+                throw new \Exception("");
+            }
 
-        $columns = implode(", ", array_keys($filter));
 
-        $query = "SELECT {$selected_column} FROM {$table} WHERE ";
-        $conditions = [];
-        foreach ($filter as $key => $val) {
-            $conditions[] = "{$key} = :{$key}";
+            $query = "SELECT {$selected_column} FROM {$table} WHERE ";
+            $conditions = [];
+            foreach ($filter as $key => $val) {
+                $conditions[] = "{$key} = :{$key}";
+            }
+            $query .= implode(' AND ', $conditions);
+    
+            $stmt = $pdo->prepare($query);
+    
+            foreach ($filter as $key => &$val) {
+                $stmt->bindParam(":{$key}", $val);
+            }
+
+            $stmt->execute();
+
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                // si '*' est selectionne, on itere sur toutes les colonnes
+                if ($selected_column === '*') {
+                    foreach ($row as $column => $value) {
+                        echo "{$column}: {$value}<br/>";
+                    }
+                } else {
+                    // sinon on affiche les colonnes selectionnees
+                    echo "{$row[$selected_column]}<br/>";
+                }
+            }
+        } catch (\Exception $e) {
+            echo "Error: " . $e->getMessage();
         }
-        $query .= implode(' AND ', $conditions);
-
-        $stmt = $pdo->prepare($query);
-
-        foreach ($filter as $key => &$val) {
-            $stmt->bindParam(":{$key}", $val);
-        }
-
-        $stmt->execute();
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            echo "{$row[$selected_column]}<br/>";
-        }
-    } catch (\Exception $e) {
-        echo "Error: " . $e->getMessage();
     }
-}
 
     public function updateRecord($table, $record, $filter)
     {
