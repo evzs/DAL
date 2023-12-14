@@ -37,28 +37,44 @@ class DataBase
     }
 
     // selectionne un registre dans la table
+
     public function selectRecord($table, $filter)
     {
         try {
             $pdo = $this->connection->getConnection();
 
-            if (isset($filter['select_column'])) {
-                $selected_column = $filter['select_column'];
-                unset($filter['select_column']);
-            } else {
-                throw new \Exception("");
+            // va verifier si `select_colum` existe dans le filtre
+            if (!isset($filter['select_column'])) {
+                throw new \Exception("Please select column(s)");
             }
 
+            // recupere les colonnes selectionnees
+            $columns = $filter['select_column'];
 
-            $query = "SELECT {$selected_column} FROM {$table} WHERE ";
+            // construit la clause SELECT selon les colonnes selectionnees
+            switch ($columns) {
+                case '*':
+                    $selected_columns = '*'; // selection de toutes les colonnes
+                    break;
+                case is_array($columns):
+                    $selected_columns = implode(', ', $columns); // selection specifique de colonnes
+                    break;
+                default:
+                    throw new \Exception("Columns must be input in an array");
+            }
+
+            unset($filter['select_column']);
+
+
+            $query = "SELECT {$selected_columns} FROM {$table} WHERE ";
             $conditions = [];
             foreach ($filter as $key => $val) {
                 $conditions[] = "{$key} = :{$key}";
             }
             $query .= implode(' AND ', $conditions);
-    
+
             $stmt = $pdo->prepare($query);
-    
+
             foreach ($filter as $key => &$val) {
                 $stmt->bindParam(":{$key}", $val);
             }
@@ -67,15 +83,14 @@ class DataBase
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 // si '*' est selectionne, on itere sur toutes les colonnes
-                if ($selected_column === '*') {
-                    foreach ($row as $column => $value) {
-                        echo "{$column}: {$value}<br/>";
-                    }
-                } else {
-                    // sinon on affiche les colonnes selectionnees
-                    echo "{$row[$selected_column]}<br/>";
+                // sinon on affiche la ou les colonnes selectionnees
+                $displayed_columns = ($selected_columns === '*') ? array_keys($row) : explode(', ', $selected_columns);
+
+                foreach ($displayed_columns as $column) {
+                    echo "{$column}: {$row[$column]}<br/>";
                 }
             }
+
         } catch (\Exception $e) {
             echo "Error: " . $e->getMessage();
         }
@@ -86,12 +101,14 @@ class DataBase
         try {
             $pdo = $this->connection->getConnection();
 
+            // le tableau `set_array` sert a stocker les clauses SET
             $set_array = [];
             foreach ($record as $column => $value) {
                 $set_array[] = "{$column} = :{$column}";
             }
             $set_clause   = implode(', ', $set_array);
 
+            // le tableau `filter_array` sert a stocker les clauses WHERE
             $filter_array = [];
             foreach ($filter as $column => $value) {
                 $filter_array[] = "{$column} = :where_{$column}";

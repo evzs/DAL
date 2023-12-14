@@ -6,12 +6,13 @@ try {
     $db = new DataBase();
 
     $table = 'test_table';
-    $filter = [
-        'id' => 1,
-        'select_column' => '*',
+
+    $record = [
+        'test_column' => 'aaaa, aaaa'
     ];
 
-    $db->selectRecord($table, $filter);
+    $db->addRecord($table, $record);
+
 } catch (\Exception $e) {
     echo "Error: " . $e->getMessage();
 }
