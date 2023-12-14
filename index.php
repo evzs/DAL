@@ -8,7 +8,7 @@ try {
     $table = 'test_table';
 
     $record = [
-        'test_column' => 'aaaa, aaaa'
+        'test_column' => 'hello'
     ];
 
     $db->addRecord($table, $record);
