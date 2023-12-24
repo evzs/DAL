@@ -1,14 +1,14 @@
 <?php
 namespace Credentials;
 
+// TODO: remettre id comme filtre obligatoire plutot que de laisser libre choix pour certaines actions
 class DataBase
 {
     private $connection;
 
     public function __construct()
     {
-        $this->connection = new Connection();
-        // TODO: instancier PDO ici?
+        $this->pdo = (new Connection())->getConnection();
     }
     
 
@@ -16,13 +16,11 @@ class DataBase
     public function addRecord($table, $record)
     {
         try {
-            $pdo = $this->connection->getConnection();
-
             $columns = implode(", ", array_keys($record));
             $vals = ":" . implode(", :", array_keys($record));
             $query = "INSERT INTO {$table} ({$columns}) VALUES ({$vals}) ";
 
-            $stmt = $pdo->prepare($query);
+            $stmt = $this->pdo->prepare($query);
 
             foreach ($record as $key => $value) {
                 $stmt->bindValue(":{$key}", $value);
@@ -41,8 +39,6 @@ class DataBase
     public function selectRecord($table, $filter)
     {
         try {
-            $pdo = $this->connection->getConnection();
-
             // va verifier si `select_colum` existe dans le filtre
             if (!isset($filter['select_column'])) {
                 throw new \Exception("Please select column(s)");
@@ -73,7 +69,7 @@ class DataBase
             }
             $query .= implode(' AND ', $conditions);
 
-            $stmt = $pdo->prepare($query);
+            $stmt = $this->pdo->prepare($query);
 
             foreach ($filter as $key => &$val) {
                 $stmt->bindParam(":{$key}", $val);
@@ -99,8 +95,6 @@ class DataBase
     public function updateRecord($table, $record, $filter)
     {
         try {
-            $pdo = $this->connection->getConnection();
-
             // le tableau `set_array` sert a stocker les clauses SET
             $set_array = [];
             foreach ($record as $column => $value) {
@@ -117,7 +111,7 @@ class DataBase
 
             $query = "UPDATE {$table} SET {$set_clause} WHERE {$filter_clause}";
 
-            $stmt = $pdo->prepare($query);
+            $stmt = $this->pdo->prepare($query);
 
             foreach ($record as $column => &$value) {
                 $stmt->bindParam(":{$column}", $value);
@@ -137,8 +131,6 @@ class DataBase
     public function deleteRecord($table, $filter)
     {
         try {
-            $pdo = $this->connection->getConnection();
-
             $filter_array = [];
             foreach ($filter as $column => $value) {
                 $filter_array[] = "{$column} = :{$column}";
@@ -147,7 +139,7 @@ class DataBase
 
             $query = "DELETE FROM {$table} WHERE {$filter_clause}";
 
-            $stmt = $pdo->prepare($query);
+            $stmt = $this->pdo->prepare($query);
 
             foreach ($filter as $column => &$value) {
                 $stmt->bindParam(":{$column}", $value);
