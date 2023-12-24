@@ -9,7 +9,7 @@ Ce projet vise a realiser un DAL avec des points API associes, exposant l'ensemb
 Le projet est incomplet jusque la, n'ayant pas d'API, mais reste utilisable et permet de performer les operations CRUD attendues.
 
 ## Configuration
-- Votre fichier contenant les credentials devrait avoir cette structure (remplacez avec les valeurs correspondantes):
+- Votre fichier contenant les credentials devrait avoir cette structure (remplacez avec les valeurs correspondantes), au format json:
 ``` json
 {
   "server_name": "nom du serveur sur lequel vous travaillez (ex: localhost)",
