@@ -12,6 +12,6 @@ class PATH
     }
 
     public static function CREDENTIALS($file = "") {
-        return self::SECURED_ROOT('credentials/' . $file);
+        return self::SECURED_ROOT('Credentials/' . $file);
     }
 }
